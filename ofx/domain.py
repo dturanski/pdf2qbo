@@ -96,6 +96,7 @@ class OfxBuilder:
             elif not done:
                 # if the line starts with a date, than this is the first line of a transaction.
                 # capture the day and month. Assumes the transactions are in chronological order.
+                # todo: They are not necessarily in order
                 search = re.search("^(\d{2})/(\d{2})", line)
                 if search:
                     month = int(search.group(1))
@@ -104,6 +105,9 @@ class OfxBuilder:
                     if self.statement_start_date.month == 12 and month == 1 and rollover_year:
                         self.year += 1
                         rollover_year = False
+                    elif self.statement_start_date.month == 12 and month == 12:
+                        self.year = self.statement_start_date.year
+                        rollover_year = True
                     txn_date = datetime(month=month, day=day, year=self.year, tzinfo=UTC)
                     print("\ntransaction on " + line)
                     # Create an OFX STMTTRN object, skip check entries unless we are in the `Checks Paid` section
